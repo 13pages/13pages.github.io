@@ -62,7 +62,7 @@
   --bottom-bar-border: #3d3020;
 }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
   background: var(--parchment);
@@ -486,9 +486,19 @@ body:not([data-wc="on"]) .wc-badge { display: none; }
 .tooltip-cloud.touch-mode .tooltip-close { display: flex; align-items: center; justify-content: center; }
 .tooltip-cloud.touch-mode { padding-right: 28px; }
 
-/* Mobile: keep tooltip from overflowing */
+/* Mobile: keep tooltip from overflowing — use fixed positioning */
 @media (max-width: 700px) {
-  .tooltip-cloud { max-width: 200px; font-size: 0.78rem; }
+  .tooltip-cloud {
+    max-width: 200px;
+    font-size: 0.78rem;
+    position: fixed;
+    left: auto;
+    right: auto;
+    transform: none;
+  }
+  .tooltip-cloud::before {
+    display: none;
+  }
 }
 
 /* ── MOBILE BOTTOM BAR ── */
@@ -1165,11 +1175,37 @@ function setupTooltip(host,btn,tooltip){
   let touchActive=false;
   let suppressHover=false;
 
+  // Position tooltip within viewport on mobile
+  function positionTooltip(){
+    if(window.innerWidth>700)return;
+    const btnRect=btn.getBoundingClientRect();
+    const tipW=tooltip.offsetWidth||200;
+    const vw=window.innerWidth;
+    const margin=8;
+    // Place below the button
+    tooltip.style.top=(btnRect.bottom+8)+'px';
+    // Center on button, but clamp within viewport
+    let left=btnRect.left+btnRect.width/2-tipW/2;
+    if(left+tipW>vw-margin)left=vw-margin-tipW;
+    if(left<margin)left=margin;
+    tooltip.style.left=left+'px';
+  }
+
+  function showTooltip(mode){
+    if(mode==='hover'){
+      tooltip.classList.remove('touch-mode');
+    }else{
+      tooltip.classList.add('touch-mode');
+    }
+    tooltip.classList.add('show');
+    // After showing, reposition on mobile
+    requestAnimationFrame(()=>positionTooltip());
+  }
+
   // Desktop hover (only on real hover devices)
   function showHover(){
     if(touchActive||suppressHover||!HAS_HOVER)return;
-    tooltip.classList.remove('touch-mode');
-    tooltip.classList.add('show');
+    showTooltip('hover');
   }
   function hideHover(){
     if(touchActive)return;
@@ -1192,7 +1228,7 @@ function setupTooltip(host,btn,tooltip){
     suppressHover=true; // any touch suppresses hover handling for this button
     pressTimer=setTimeout(()=>{
       touchActive=true;
-      tooltip.classList.add('touch-mode','show');
+      showTooltip('touch');
     },500);
   },{passive:true});
   btn.addEventListener('touchend',e=>{
