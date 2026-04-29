@@ -619,7 +619,10 @@ body:not([data-wc="on"]) .wc-badge { display: none; }
       <button class="ctrl-btn" id="wordCountToggle"><span class="wc-label-full">Word Count</span><span class="wc-label-short">123</span></button>
       <span class="tooltip-cloud" id="wcTooltip"><button class="tooltip-close" aria-label="Close tooltip">&#10005;</button><span id="wcTooltipText"></span></span>
     </span>
-    <button class="ctrl-btn theme-toggle" id="themeToggle" title="Toggle light/dark mode">&#9789;</button>
+    <span class="tip-host">
+      <button class="ctrl-btn theme-toggle" id="themeToggle">&#9789;</button>
+      <span class="tooltip-cloud" id="themeTooltip"><button class="tooltip-close" aria-label="Close tooltip">&#10005;</button><span id="themeTooltipText">Toggle light/dark mode</span></span>
+    </span>
     <span class="tip-host">
       <button class="ctrl-btn" id="sealedToggle">❤️Sealed</button>
       <span class="tooltip-cloud" id="sealedTooltip"><button class="tooltip-close" aria-label="Close tooltip">&#10005;</button><span id="sealedTooltipText"></span></span>
@@ -1062,6 +1065,9 @@ function init(){
   const wcBtn=document.getElementById('wordCountToggle');
   const wcTip=document.getElementById('wcTooltip');
   setupTooltip(wcBtn.parentElement,wcBtn,wcTip);
+  const themeBtn=document.getElementById('themeToggle');
+  const themeTip=document.getElementById('themeTooltip');
+  setupTooltip(themeBtn.parentElement,themeBtn,themeTip);
   const sealedBtn=document.getElementById('sealedToggle');
   const sealedTip=document.getElementById('sealedTooltip');
   setupTooltip(sealedBtn.parentElement,sealedBtn,sealedTip);
@@ -1212,8 +1218,13 @@ function setupTooltip(host,btn,tooltip){
     tooltip.classList.remove('show');
   }
   if(HAS_HOVER){
-    btn.addEventListener('mouseenter',showHover);
+    let hoverShowTimer=null;
+    btn.addEventListener('mouseenter',()=>{
+      clearTimeout(hoverTimer);
+      hoverShowTimer=setTimeout(showHover,600);
+    });
     btn.addEventListener('mouseleave',()=>{
+      clearTimeout(hoverShowTimer);
       // Delay so user can move into tooltip if needed
       hoverTimer=setTimeout(()=>{
         if(!tooltip.matches(':hover'))hideHover();
