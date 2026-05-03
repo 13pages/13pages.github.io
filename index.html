@@ -699,7 +699,8 @@ function chs(){return TRANSLATIONS[currentTranslation];}
 function st(){return allStates[currentTranslation];}
 
 // ── Tokenize ──
-function tokenize(t){const r=[];const rx=/(\S+)/g;let m,l=0;while((m=rx.exec(t))!==null){if(m.index>l)r.push({t:'s',x:t.slice(l,m.index)});r.push({t:'w',x:m[1]});l=rx.lastIndex;}if(l<t.length)r.push({t:'s',x:t.slice(l)});return r;}
+function tokenize(t){const r=[];const rx=/(\S+)/g;let m,l=0;while((m=rx.exec(t))!==null){if(m.index>l)r.push({t:'s',x:t.slice(l,m.index)});const raw=m[1];// Split on em-dash/en-dash into separate words
+if(/[—–]/.test(raw)){const parts=raw.split(/([—–])/);parts.forEach(p=>{if(/^[—–]$/.test(p)){r.push({t:'s',x:p});}else if(p.length>0){r.push({t:'w',x:p});}});}else{r.push({t:'w',x:raw});}l=rx.lastIndex;}if(l<t.length)r.push({t:'s',x:t.slice(l)});return r;}
 
 // ── Select hidden words ──
 function selectHidden(ci,pct){
@@ -1329,6 +1330,6 @@ function loadState(){
 
 init();
 </script>
-<script data-goatcounter="https://paulinzon.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script data-goatcounter="https://13pages.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
